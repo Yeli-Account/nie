@@ -119,128 +119,6 @@ margin: auto;
 perspective: 1000px;
 }
 .card {
-html
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nise Client | Client Tool</title>
-<style>
-:root {
---md-sys-color-primary: #D0BCFF;
---md-sys-color-on-primary: #381E72;
---md-sys-color-surface-container-high: #2B2930;
---md-sys-color-on-surface: #E6E1E5;
---md-sys-color-surface: #0F0D13;
---md-sys-color-outline: #938F99;
---md-sys-color-on-surface-variant: #CAC4D0;
---md-sys-color-secondary-container: #4A4458;
---md-sys-color-on-secondary-container: #E8DEF8;
---radius-card: 28px;
---radius-btn: 12px;
---transition-speed: 0.6s;
-}
-* {
-margin: 0;
-padding: 0;
-box-sizing: border-box;
-font-family: 'Roboto', system-ui, -apple-system, sans-serif;
--webkit-font-smoothing: antialiased;
-}
-body {
-background-color: var(--md-sys-color-surface);
-color: var(--md-sys-color-on-surface);
-height: 100vh;
-overflow: hidden;
-position: relative;
-}
-::-webkit-scrollbar {
-display: none;
-width: 0;
-}
-.view-section {
--ms-overflow-style: none;
-scrollbar-width: none;
-}
-.ambient-glow {
-position: fixed;
-top: 0;
-left: 0;
-width: 100%;
-height: 100%;
-z-index: -2;
-pointer-events: none;
-}
-.glow-orb {
-position: absolute;
-border-radius: 50%;
-filter: blur(90px);
-opacity: 0.35;
-animation: breathe 12s infinite alternate ease-in-out;
-}
-.glow-1 {
-top: -15%;
-left: -15%;
-width: 60vw;
-height: 60vw;
-background: #4F378B;
-}
-.glow-2 {
-bottom: -15%;
-right: -15%;
-width: 70vw;
-height: 70vw;
-background: #2b1f42;
-animation-delay: -6s;
-}
-@keyframes breathe {
-0% { transform: scale(1); opacity: 0.3; }
-100% { transform: scale(1.1); opacity: 0.5; }
-}
-#snow-canvas {
-position: fixed;
-top: 0;
-left: 0;
-width: 100%;
-height: 100%;
-pointer-events: none;
-z-index: -1;
-}
-.view-section {
-position: absolute;
-top: 0;
-left: 0;
-width: 100%;
-height: 100%;
-display: flex;
-transition: opacity var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1), transform var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
-opacity: 0;
-pointer-events: none;
-transform: translateY(30px);
-overflow-y: auto;
-overflow-x: hidden;
-padding: 20px 0;
-}
-.view-section.active {
-opacity: 1;
-pointer-events: all;
-transform: translateY(0);
-z-index: 10;
-}
-.view-section.hidden-up {
-transform: translateY(-60px);
-}
-.view-section.hidden-down {
-transform: translateY(60px);
-}
-.container {
-width: 90%;
-max-width: 580px;
-margin: auto;
-perspective: 1000px;
-}
-.card {
 background: rgba(25, 23, 30, 0.7);
 backdrop-filter: blur(24px) saturate(120%);
 -webkit-backdrop-filter: blur(24px) saturate(120%);
@@ -284,6 +162,8 @@ height: 100%;
 border: 0;
 display: block;
 border-radius: 16px;
+-webkit-mask-image: -webkit-radial-gradient(circle, white 100%, black 100%);
+mask-image: radial-gradient(circle, white 100%, black 100%);
 }
 .feature-box {
 background: rgba(255,255,255,0.02);
@@ -393,7 +273,6 @@ padding: 6px 10px;
 border-radius: 6px;
 border: 1px solid rgba(255,255,255,0.05);
 transition: 0.2s;
-cursor: pointer;
 user-select: none;
 }
 .chip:hover {
@@ -473,6 +352,7 @@ border-left: 3px solid var(--md-sys-color-primary);
 font-size: 1.1rem;
 }
 #toast {
+display: none;
 visibility: hidden;
 position: fixed;
 bottom: 30px;
@@ -668,20 +548,18 @@ const btnDown = document.getElementById('btn-scroll-down');
 const btnUp = document.getElementById('btn-scroll-up');
 let isMainActive = true;
 let isAnimating = false;
-let isMainScrolledToBottom = false;
 function checkMainScrollPosition() {
 const scrollTop = mainView.scrollTop;
 const scrollHeight = mainView.scrollHeight;
 const clientHeight = mainView.clientHeight;
-isMainScrolledToBottom = (scrollTop + clientHeight) >= (scrollHeight - 20);
-btnDown.style.opacity = isMainScrolledToBottom ? 1 : 0.6;
+const isBottom = (scrollTop + clientHeight) >= scrollHeight - 10;
+btnDown.style.opacity = isBottom ? 1 : 0.6;
 }
 mainView.addEventListener('scroll', checkMainScrollPosition);
 window.addEventListener('resize', checkMainScrollPosition);
 checkMainScrollPosition();
 function toggleSection() {
 if (isAnimating) return;
-if (isMainActive && !isMainScrolledToBottom) return;
 isAnimating = true;
 if (isMainActive) {
 mainView.classList.remove('active');
@@ -694,7 +572,7 @@ infoView.classList.add('hidden-down');
 mainView.classList.remove('hidden-up');
 mainView.classList.add('active');
 setTimeout(() => {
-mainView.scrollTo(0, mainView.scrollHeight);
+mainView.scrollTo(0, 0);
 }, 100);
 }
 isMainActive = !isMainActive;
@@ -706,53 +584,35 @@ btnDown.addEventListener('click', toggleSection);
 btnUp.addEventListener('click', toggleSection);
 window.addEventListener('wheel', (e) => {
 if (isAnimating) return;
-if (window.innerWidth > 768) {
-if (e.deltaY > 0 && isMainActive && isMainScrolledToBottom) toggleSection();
-else if (e.deltaY < 0 && !isMainActive) toggleSection();
+const scrollTop = mainView.scrollTop;
+const scrollHeight = mainView.scrollHeight;
+const clientHeight = mainView.clientHeight;
+const isBottom = (scrollTop + clientHeight) >= scrollHeight - 10;
+if (e.deltaY > 0 && isMainActive && isBottom) {
+toggleSection();
+e.preventDefault();
+} else if (e.deltaY < 0 && !isMainActive) {
+toggleSection();
+e.preventDefault();
 }
 });
 let touchStartY = 0;
-window.addEventListener('touchstart', e => touchStartY = e.touches[0].clientY);
+window.addEventListener('touchstart', e => {
+touchStartY = e.touches[0].clientY;
+});
 window.addEventListener('touchend', e => {
 if (isAnimating) return;
 const touchEndY = e.changedTouches[0].clientY;
 const diff = touchStartY - touchEndY;
-if (diff > 50 && isMainActive && isMainScrolledToBottom) toggleSection();
-else if (diff < -50 && !isMainActive) toggleSection();
-});
-})();
-(function() {
-const chips = document.querySelectorAll('.chip');
-const toast = document.getElementById('toast');
-let toastTimer;
-const qqNum = '3118096383';
-function showToast(message) {
-toast.textContent = message;
-toast.classList.add('show');
-if(toastTimer) clearTimeout(toastTimer);
-toastTimer = setTimeout(() => {
-toast.classList.remove('show');
-}, 3000);
+const scrollTop = mainView.scrollTop;
+const scrollHeight = mainView.scrollHeight;
+const clientHeight = mainView.clientHeight;
+const isBottom = (scrollTop + clientHeight) >= scrollHeight - 10;
+if (diff > 50 && isMainActive && isBottom) {
+toggleSection();
+} else if (diff < -50 && !isMainActive) {
+toggleSection();
 }
-chips.forEach(chip => {
-chip.addEventListener('click', function() {
-if (navigator.clipboard && window.isSecureContext) {
-navigator.clipboard.writeText(qqNum).catch(err => console.error(err));
-} else {
-const textarea = document.createElement('textarea');
-textarea.value = qqNum;
-textarea.style.position = 'fixed';
-document.body.appendChild(textarea);
-textarea.select();
-document.execCommand('copy');
-document.body.removeChild(textarea);
-}
-showToast(`已复制QQ：${qqNum}，前往添加...`);
-setTimeout(() => {
-const url = "mqqapi://card/show_pslcard?src_type=internal&version=1&uin=" + qqNum + "&card_type=group&source=qrcode";
-window.location.href = url;
-}, 500);
-});
 });
 })();
 (function() {
