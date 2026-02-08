@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nise Client | Client Tool</title>
+    <style>
+        :root {
+            --md-sys-color-primary: #D0BCFF;
+            --md-sys-color-on-primary: #381E72;
+            --md-sys-color-surface-container-high: #2B2930;
+            --md-sys-color-on-surface: #E6E1E5;
+            --md-sys-color-surface: #0F0D13;
+            --md-sys-color-outline: #938F99;
+            --md-sys-color-on-surface-variant: #CAC4D0;
+            --md-sys-color-secondary-container: #4A4458;
+            --md-sys-color-on-secondary-container: #E8DEF8;
+            --radius-card: 28px;
+            --radius-btn: 12px;
+            --transition-speed: 0.6s;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', system-ui, -apple-system, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        body {
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+        ::-webkit-scrollbar {
+            display: none;
+            width: 0;
+        }
+        .view-section {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .ambient-glow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            pointer-events: none;
+        }
+        .glow-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: 0.35;
+            animation: breathe 12s infinite alternate ease-in-out;
+        }
+        .glow-1 {
+            top: -15%;
+            left: -15%;
+            width: 60vw;
+            height: 60vw;
+            background: #4F378B;
+        }
+        .glow-2 {
+            bottom: -15%;
+            right: -15%;
+            width: 70vw;
+            height: 70vw;
+            background: #2b1f42;
+            animation-delay: -6s;
+        }
+        @keyframes breathe {
+            0% { transform: scale(1); opacity: 0.3; }
+            100% { transform: scale(1.1); opacity: 0.5; }
+        }
+        #snow-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        .view-section {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            transition: opacity var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1), transform var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(30px);
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 20px 0;
+        }
+        .view-section.active {
+            opacity: 1;
+            pointer-events: all;
+            transform: translateY(0);
+            z-index: 10;
+        }
+        .view-section.hidden-up {
+            transform: translateY(-60px);
+        }
+        .view-section.hidden-down {
+            transform: translateY(60px);
+        }
+        .container {
+            width: 90%;
+            max-width: 580px;
+            margin: auto;
+            perspective: 1000px;
+        }
+        .card {
+            background: rgba(25, 23, 30, 0.7);
+            backdrop-filter: blur(24px) saturate(120%);
+            -webkit-backdrop-filter: blur(24px) saturate(120%);
+            border: 1px solid rgba(208, 188, 255, 0.08);
+            border-radius: var(--radius-card);
+            padding: 40px 32px;
+            box-shadow: 0 24px 48px rgba(0,0,0,0.4);
+            text-align: center;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 300;
+            color: var(--md-sys-color-primary);
+            letter-spacing: -1px;
+            margin-bottom: 8px;
+            text-shadow: 0 0 25px rgba(208, 188, 255, 0.25);
+        }
+        .slogan {
+            font-size: 0.95rem;
+            color: var(--md-sys-color-on-surface-variant);
+            opacity: 0.9;
+            margin-bottom: 32px;
+        }
+        .video-box {
+            width: 100%;
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 32px;
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+        .video-box iframe {
+            width: 100%;
+            height: 280px;
+            border: 0;
+        }
+        .feature-box {
+            background: rgba(255,255,255,0.02);
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-bottom: 32px;
+            text-align: left;
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+        .feature-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        .feature-item {
+            font-size: 0.95rem;
+            color: var(--md-sys-color-on-surface);
+            display: flex;
+            align-items: center;
+            padding: 2px 0;
+        }
+        .feature-item::before {
+            content: "·";
+            color: var(--md-sys-color-primary);
+            font-weight: 900;
+            font-size: 1.4rem;
+            margin-right: 12px;
+            line-height: 0;
+            position: relative;
+            top: 1px;
+        }
+        .price-box {
+            background: rgba(208, 188, 255, 0.05);
+            border: 1px solid rgba(208, 188, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 32px;
+        }
+        .price-content {
+            color: var(--md-sys-color-on-surface);
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+        .price-content span {
+            color: var(--md-sys-color-primary);
+            font-weight: 500;
+        }
+        .action-section {
+            margin-bottom: 32px;
+        }
+        .action-title {
+            font-size: 0.95rem;
+            color: var(--md-sys-color-primary);
+            margin-bottom: 16px;
+            font-weight: 500;
+            text-align: center;
+        }
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 50px;
+            border-radius: var(--radius-btn);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+        }
+        .btn svg {
+            width: 18px;
+            height: 18px;
+            margin-right: 8px;
+            fill: currentColor;
+        }
+        .btn-filled {
+            background: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
+        .btn-filled:hover {
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(208, 188, 255, 0.3);
+        }
+        .footer {
+            border-top: 1px solid rgba(255,255,255,0.08);
+            padding-top: 24px;
+        }
+        .footer-title {
+            font-size: 0.75rem;
+            color: var(--md-sys-color-outline);
+            margin-bottom: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+        .group-chips {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+        }
+        .chip {
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: var(--md-sys-color-on-surface-variant);
+            background: rgba(255,255,255,0.03);
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: 0.2s;
+            cursor: pointer;
+            user-select: none;
+        }
+        .chip:hover {
+            border-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-primary);
+            background: rgba(208, 188, 255, 0.05);
+        }
+        .chip:active {
+            transform: scale(0.95);
+        }
+        .scroll-indicator, .back-indicator {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            padding: 20px;
+            z-index: 20;
+        }
+        .scroll-indicator {
+            bottom: -60px;
+            animation: breatheArrow 2.5s infinite ease-in-out;
+        }
+        .back-indicator {
+            top: -60px;
+            opacity: 0.5;
+            transition: 0.3s;
+        }
+        .back-indicator:hover {
+            opacity: 1;
+            color: var(--md-sys-color-primary);
+        }
+        .back-indicator svg, .scroll-indicator svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+        .scroll-indicator .arrow-icon {
+            fill: var(--md-sys-color-on-surface-variant);
+            opacity: 0.6;
+            transition: 0.3s;
+        }
+        .scroll-indicator:hover .arrow-icon {
+            fill: var(--md-sys-color-primary);
+            opacity: 1;
+        }
+        @keyframes breatheArrow {
+            0%, 100% { opacity: 0.2; transform: translateX(-50%) translateY(0); }
+            50% { opacity: 0.8; transform: translateX(-50%) translateY(8px); }
+        }
+        .about-list {
+            text-align: left;
+            margin-bottom: 30px;
+        }
+        .about-item {
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: var(--md-sys-color-on-surface);
+            font-size: 0.95rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        .about-label {
+            color: var(--md-sys-color-outline);
+        }
+        .quote-box {
+            font-style: italic;
+            font-family: "Georgia", serif;
+            color: var(--md-sys-color-primary);
+            background: rgba(208, 188, 255, 0.05);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 30px 0;
+            border-left: 3px solid var(--md-sys-color-primary);
+            font-size: 1.1rem;
+        }
+        #toast {
+            visibility: hidden;
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: rgba(15, 13, 19, 0.9);
+            border: 1px solid rgba(208, 188, 255, 0.3);
+            color: var(--md-sys-color-primary);
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 15px rgba(208, 188, 255, 0.2);
+            text-shadow: 0 0 10px rgba(208, 188, 255, 0.8), 0 0 20px rgba(208, 188, 255, 0.4);
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            opacity: 0;
+            z-index: 100;
+        }
+        #toast.show {
+            visibility: visible;
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        @media (min-width: 768px), (orientation: landscape) {
+            ::-webkit-scrollbar {
+                display: block;
+                width: 8px;
+                height: 8px;
+            }
+            ::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            ::-webkit-scrollbar-thumb {
+                background: rgba(208, 188, 255, 0.2);
+                border-radius: 4px;
+            }
+            ::-webkit-scrollbar-thumb:hover {
+                background: rgba(208, 188, 255, 0.4);
+            }
+            .view-section {
+                scrollbar-width: thin;
+                -ms-overflow-style: auto;
+            }
+            .container {
+                max-width: 900px;
+                margin: auto;
+                padding: 60px 0;
+            }
+            .card {
+                padding: 56px 64px;
+            }
+            .feature-list {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 12px 20px;
+            }
+            .feature-item {
+                padding: 0;
+            }
+            .video-box iframe {
+                height: 400px;
+            }
+            .btn-grid {
+                display: flex;
+                justify-content: center;
+                gap: 16px;
+            }
+            .btn {
+                flex: 1;
+                max-width: 300px;
+            }
+            @media (max-height: 500px) {
+                .container {
+                    max-width: 700px;
+                    padding: 20px 0;
+                }
+                .card {
+                    padding: 30px 40px;
+                }
+                .header h1 {
+                    font-size: 2.2rem;
+                }
+                .video-box iframe {
+                    height: 250px;
+                }
+                .scroll-indicator {
+                    bottom: -50px;
+                }
+                .back-indicator {
+                    top: -50px;
+                }
+            }
+        }
+        @media (max-width: 400px) {
+            .video-box iframe {
+                height: 220px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient-glow">
+        <div class="glow-orb glow-1"></div>
+        <div class="glow-orb glow-2"></div>
+    </div>
+    <canvas id="snow-canvas"></canvas>
+
+    <div id="main-view" class="view-section active">
+        <div class="container">
+            <div class="card">
+                <header class="header">
+                    <h1>Nise Client</h1>
+                    <p class="slogan">我的世界定制客户端 | 极致体验专属打造</p>
+                </header>
+
+                <div class="video-box">
+                    <iframe src="//player.bilibili.com/player.html?isOutside=true&aid=115440365933654&bvid=BV1ees6zUEiX&cid=33415628869&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
+                </div>
+
+                <div class="price-box">
+                    <div class="price-content">
+                        Nise Client三种样式仅<span>5r</span><br>
+                        代理<span>35r</span>无需分成 | 已绕过目前死号<br>
+                        理论适配所有版本 | 中端机可带动<br>
+                        需要的+Q <span>3118096383</span>（代理也是此号）
+                    </div>
+                </div>
+
+                <section class="feature-box">
+                    <div class="feature-list">
+                        <div class="feature-item">玩家小地图</div>
+                        <div class="feature-item">定制01145防砍</div>
+                        <div class="feature-item">FMDS光影</div>
+                        <div class="feature-item">陂风</div>
+                        <div class="feature-item">珍珠抛物线</div>
+                        <div class="feature-item">抛物线动画</div>
+                        <div class="feature-item">走动特效</div>
+                        <div class="feature-item">nova Ul</div>
+                        <div class="feature-item">中端机优化</div>
+                    </div>
+                </section>
+
+                <section class="action-section">
+                    <h3 class="action-title">立即获取</h3>
+                    <div class="btn-grid">
+                        <a href="https://qm.qq.com/q/7giw5ghxjq" target="_blank" class="btn btn-filled">
+                            <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg> 立即获取
+                        </a>
+                    </div>
+                </section>
+
+                <footer class="footer">
+                    <div class="footer-title">核心优势</div>
+                    <div class="group-chips">
+                        <div class="chip">全版本适配</div>
+                        <div class="chip">绕过死号</div>
+                        <div class="chip">中端机流畅</div>
+                        <div class="chip">代理零分成</div>
+                        <div class="chip">定制化特效</div>
+                    </div>
+                </footer>
+
+                <div class="scroll-indicator" id="btn-scroll-down">
+                    <svg class="arrow-icon" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="info-view" class="view-section hidden-down">
+        <div class="container">
+            <div class="card">
+                <div class="back-indicator" id="btn-scroll-up">
+                    <svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>
+                </div>
+
+                <header class="header">
+                    <h2>关于我们</h2>
+                    <p class="slogan">ABOUT</p>
+                </header>
+
+                <div class="quote-box">
+                    ”Minecraft即是爱情，Minecraft即是生命“
+                </div>
+
+                <div class="about-list">
+                    <div class="about-item">
+                        <span class="about-label">软件开发</span>
+                        <span>Nise Team</span>
+                    </div>
+                    <div class="about-item">
+                        <span class="about-label">发布日期</span>
+                        <span>2025/02/08</span>
+                    </div>
+                    <div class="about-item">
+                        <span class="about-label">当前版本</span>
+                        <span>Latest</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast">已复制，正在前往QQ...</div>
+
+    <script>
+        (function() {
+            const mainView = document.getElementById('main-view');
+            const infoView = document.getElementById('info-view');
+            const btnDown = document.getElementById('btn-scroll-down');
+            const btnUp = document.getElementById('btn-scroll-up');
+            let isMainActive = true;
+            let isAnimating = false;
+            let isMainScrolledToBottom = false;
+
+            function checkMainScrollPosition() {
+                const scrollTop = mainView.scrollTop;
+                const scrollHeight = mainView.scrollHeight;
+                const clientHeight = mainView.clientHeight;
+                isMainScrolledToBottom = (scrollTop + clientHeight) >= (scrollHeight - 20);
+                btnDown.style.opacity = isMainScrolledToBottom ? 1 : 0.6;
+            }
+
+            mainView.addEventListener('scroll', checkMainScrollPosition);
+            window.addEventListener('resize', checkMainScrollPosition);
+            checkMainScrollPosition();
+
+            function toggleSection() {
+                if (isAnimating) return;
+                if (isMainActive && !isMainScrolledToBottom) return;
+                
+                isAnimating = true;
+                if (isMainActive) {
+                    mainView.classList.remove('active');
+                    mainView.classList.add('hidden-up');
+                    infoView.classList.remove('hidden-down');
+                    infoView.classList.add('active');
+                } else {
+                    infoView.classList.remove('active');
+                    infoView.classList.add('hidden-down');
+                    mainView.classList.remove('hidden-up');
+                    mainView.classList.add('active');
+                    setTimeout(() => {
+                        mainView.scrollTo(0, mainView.scrollHeight);
+                    }, 100);
+                }
+                isMainActive = !isMainActive;
+                setTimeout(() => {
+                    isAnimating = false;
+                }, 600);
+            }
+
+            btnDown.addEventListener('click', toggleSection);
+            btnUp.addEventListener('click', toggleSection);
+
+            window.addEventListener('wheel', (e) => {
+                if (isAnimating) return;
+                if (window.innerWidth > 768) {
+                    if (e.deltaY > 0 && isMainActive && isMainScrolledToBottom) toggleSection();
+                    else if (e.deltaY < 0 && !isMainActive) toggleSection();
+                }
+            });
+
+            let touchStartY = 0;
+            window.addEventListener('touchstart', e => touchStartY = e.touches[0].clientY);
+            window.addEventListener('touchend', e => {
+                if (isAnimating) return;
+                const touchEndY = e.changedTouches[0].clientY;
+                const diff = touchStartY - touchEndY;
+                if (diff > 50 && isMainActive && isMainScrolledToBottom) toggleSection();
+                else if (diff < -50 && !isMainActive) toggleSection();
+            });
+        })();
+
+        (function() {
+            const chips = document.querySelectorAll('.chip');
+            const toast = document.getElementById('toast');
+            let toastTimer;
+            const qqNum = '3118096383';
+
+            function showToast(message) {
+                toast.textContent = message;
+                toast.classList.add('show');
+                if(toastTimer) clearTimeout(toastTimer);
+                toastTimer = setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            }
+
+            chips.forEach(chip => {
+                chip.addEventListener('click', function() {
+                    if (navigator.clipboard && window.isSecureContext) {
+                        navigator.clipboard.writeText(qqNum).catch(err => console.error(err));
+                    } else {
+                        const textarea = document.createElement('textarea');
+                        textarea.value = qqNum;
+                        textarea.style.position = 'fixed';
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textarea);
+                    }
+                    showToast(`已复制QQ：${qqNum}，前往添加...`);
+                    setTimeout(() => {
+                        const url = "mqqapi://card/show_pslcard?src_type=internal&version=1&uin=" + qqNum + "&card_type=group&source=qrcode";
+                        window.location.href = url;
+                    }, 500);
+                });
+            });
+        })();
+
+        (function() {
+            const canvas = document.getElementById('snow-canvas');
+            const ctx = canvas.getContext('2d');
+            let w, h;
+            const flakes = [];
+            const TOTAL = 80;
+
+            function resize() {
+                w = canvas.width = window.innerWidth;
+                h = canvas.height = window.innerHeight;
+            }
+
+            class Flake {
+                constructor() {
+                    this.init(true);
+                }
+                init(first = false) {
+                    this.x = Math.random() * w;
+                    this.y = first ? Math.random() * h : -10;
+                    this.r = Math.random() * 1.5 + 0.5;
+                    this.vy = Math.random() * 1 + 0.5;
+                    this.vx = Math.random() * 0.8 - 0.4;
+                    this.alpha = Math.random() * 0.6 + 0.2;
+                    this.sway = Math.random() * 0.03 + 0.01;
+                    this.angle = Math.random() * Math.PI * 2;
+                }
+                update() {
+                    this.y += this.vy;
+                    this.x += this.vx + Math.sin(this.angle) * 2;
+                    this.angle += this.sway;
+                    if (this.y > h + 10 || this.x < -20 || this.x > w + 20) this.init();
+                }
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(240, 235, 255, ${this.alpha})`;
+                    ctx.shadowBlur = 8;
+                    ctx.shadowColor = 'rgba(208, 188, 255, 0.6)';
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                }
+            }
+
+            function init() {
+                resize();
+                for (let i = 0; i < TOTAL; i++) flakes.push(new Flake());
+                animate();
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, w, h);
+                flakes.forEach(f => {
+                    f.update();
+                    f.draw();
+                });
+                requestAnimationFrame(animate);
+            }
+
+            window.addEventListener('resize', resize);
+            document.addEventListener('DOMContentLoaded', init);
+        })();
+    </script>
+</body>
+</html>
