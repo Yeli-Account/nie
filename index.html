@@ -165,6 +165,18 @@ border-radius: 16px;
 -webkit-mask-image: -webkit-radial-gradient(circle, white 100%, black 100%);
 mask-image: radial-gradient(circle, white 100%, black 100%);
 }
+.img-box {
+width: 100%;
+border-radius: 16px;
+overflow: hidden;
+margin-bottom: 20px;
+border: 1px solid rgba(255,255,255,0.05);
+}
+.img-box img {
+width: 100%;
+display: block;
+object-fit: cover;
+}
 .feature-box {
 background: rgba(255,255,255,0.02);
 border-radius: 16px;
@@ -462,30 +474,42 @@ font-size: 2.2rem;
 <h1>Nise Client</h1>
 <p class="slogan">我的世界定制客户端 | 极致体验专属打造</p>
 </header>
+
 <div class="video-box">
-<iframe src="//player.bilibili.com/player.html?isOutside=true&aid=115915261746466&bvid=BV1E9ksBrE1f&cid=35462645933&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
+<iframe src="//player.bilibili.com/player.html?isOutside=true&aid=116051610178940&bvid=BV162c4zfEP3&cid=35987457098&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
 </div>
+
+<div class="img-box">
+<img src="1.png" alt="展示图1">
+</div>
+<div class="img-box">
+<img src="2.png" alt="展示图2">
+</div>
+
 <div class="price-box">
 <div class="price-content">
-Nise Client三种样式仅<span>5r</span><br>
+Nise Client三种样式仅<span>5.1.5</span><br>
 代理<span>35r</span>无需分成 | 已绕过目前死号<br>
 理论适配所有版本 | 中端机可带动<br>
 需要的+Q <span>3118096383</span>（代理也是此号）
 </div>
 </div>
+
 <section class="feature-box">
 <div class="feature-list">
 <div class="feature-item">玩家小地图</div>
-<div class="feature-item">定制01145防砍</div>
+<div class="feature-item">定制01145防砍可切换</div>
+<div class="feature-item">可切换防砍</div>
+<div class="feature-item">人物信息显示</div>
 <div class="feature-item">FMDS光影</div>
-<div class="feature-item">陂风</div>
+<div class="feature-item">披风</div>
 <div class="feature-item">珍珠抛物线</div>
 <div class="feature-item">抛物线动画</div>
 <div class="feature-item">走动特效</div>
-<div class="feature-item">nova Ul</div>
-<div class="feature-item">中端机优化</div>
+<div class="feature-item">独家UI NiseUIV1.0</div>
 </div>
 </section>
+
 <section class="action-section">
 <div class="btn-grid">
 <a href="https://qm.qq.com/q/7giw5ghxjq" target="_blank" class="btn btn-filled">
@@ -493,6 +517,7 @@ Nise Client三种样式仅<span>5r</span><br>
 </a>
 </div>
 </section>
+
 <footer class="footer">
 <div class="footer-title">核心优势</div>
 <div class="group-chips">
@@ -503,12 +528,14 @@ Nise Client三种样式仅<span>5r</span><br>
 <div class="chip">可自帮定制材质</div>
 </div>
 </footer>
+
 <div class="scroll-indicator" id="btn-scroll-down">
 <svg class="arrow-icon" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
 </div>
 </div>
 </div>
 </div>
+
 <div id="info-view" class="view-section hidden-down">
 <div class="container">
 <div class="card">
@@ -533,13 +560,15 @@ Nise Client三种样式仅<span>5r</span><br>
 </div>
 <div class="about-item">
 <span class="about-label">当前版本</span>
-<span>V1.2</span>
+<span>V2.0.3</span>
 </div>
 </div>
 </div>
 </div>
 </div>
+
 <div id="toast">已复制，正在前往QQ...</div>
+
 <script>
 (function() {
 const mainView = document.getElementById('main-view');
@@ -548,6 +577,7 @@ const btnDown = document.getElementById('btn-scroll-down');
 const btnUp = document.getElementById('btn-scroll-up');
 let isMainActive = true;
 let isAnimating = false;
+
 function checkMainScrollPosition() {
 const scrollTop = mainView.scrollTop;
 const scrollHeight = mainView.scrollHeight;
@@ -555,12 +585,15 @@ const clientHeight = mainView.clientHeight;
 const isBottom = (scrollTop + clientHeight) >= scrollHeight - 10;
 btnDown.style.opacity = isBottom ? 1 : 0.6;
 }
+
 mainView.addEventListener('scroll', checkMainScrollPosition);
 window.addEventListener('resize', checkMainScrollPosition);
 checkMainScrollPosition();
+
 function toggleSection() {
 if (isAnimating) return;
 isAnimating = true;
+
 if (isMainActive) {
 mainView.classList.remove('active');
 mainView.classList.add('hidden-up');
@@ -575,19 +608,23 @@ setTimeout(() => {
 mainView.scrollTo(0, 0);
 }, 100);
 }
+
 isMainActive = !isMainActive;
 setTimeout(() => {
 isAnimating = false;
 }, 600);
 }
+
 btnDown.addEventListener('click', toggleSection);
 btnUp.addEventListener('click', toggleSection);
+
 window.addEventListener('wheel', (e) => {
 if (isAnimating) return;
 const scrollTop = mainView.scrollTop;
 const scrollHeight = mainView.scrollHeight;
 const clientHeight = mainView.clientHeight;
 const isBottom = (scrollTop + clientHeight) >= scrollHeight - 10;
+
 if (e.deltaY > 0 && isMainActive && isBottom) {
 toggleSection();
 e.preventDefault();
@@ -596,6 +633,7 @@ toggleSection();
 e.preventDefault();
 }
 });
+
 let touchStartY = 0;
 window.addEventListener('touchstart', e => {
 touchStartY = e.touches[0].clientY;
@@ -608,6 +646,7 @@ const scrollTop = mainView.scrollTop;
 const scrollHeight = mainView.scrollHeight;
 const clientHeight = mainView.clientHeight;
 const isBottom = (scrollTop + clientHeight) >= scrollHeight - 10;
+
 if (diff > 50 && isMainActive && isBottom) {
 toggleSection();
 } else if (diff < -50 && !isMainActive) {
@@ -615,16 +654,19 @@ toggleSection();
 }
 });
 })();
+
 (function() {
 const canvas = document.getElementById('snow-canvas');
 const ctx = canvas.getContext('2d');
 let w, h;
 const flakes = [];
 const TOTAL = 60;
+
 function resize() {
 w = canvas.width = window.innerWidth;
 h = canvas.height = window.innerHeight;
 }
+
 class Flake {
 constructor() {
 this.init(true);
@@ -654,11 +696,13 @@ ctx.fill();
 ctx.shadowBlur = 0;
 }
 }
+
 function init() {
 resize();
 for(let i=0; i<TOTAL; i++) flakes.push(new Flake());
 animate();
 }
+
 function animate() {
 ctx.clearRect(0,0,w,h);
 flakes.forEach(f => {
@@ -667,6 +711,7 @@ f.draw();
 });
 requestAnimationFrame(animate);
 }
+
 window.addEventListener('resize', resize);
 document.addEventListener('DOMContentLoaded', init);
 })();
